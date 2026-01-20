@@ -6,6 +6,7 @@ HaGrid Gesture Recognition & Neural Network Visualizer
 
 
 A lightweight "evening project" exploring hand gesture recognition using the HaGrid 500k dataset. It extracts hand landmarks via MediaPipe and feeds them into a custom Neural Network, visualizing the neuron activations in real-time.
+
 ⚡ Fast Facts
 
     Dataset: Subsampled from HaGrid 500k (Hand Gesture Recognition).
@@ -17,6 +18,7 @@ A lightweight "evening project" exploring hand gesture recognition using the HaG
     The Cool Part: NNNdemo.py manually calculates the forward pass to visualize the "brain's" hidden layers live.
 
 📂 File Guide
+
 File	Function
 NNNdemo.py	Start here. Runs the webcam demo with the live Neural Net visualizer.
 TrainNeuralNetwork.py	Trains the MLP (Neural Net) used for the visualization.
