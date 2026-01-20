@@ -1,0 +1,136 @@
+import cv2
+import joblib
+import numpy as np
+import mediapipe as mp
+import warnings
+
+# --- SILENCE WARNINGS ---
+warnings.filterwarnings("ignore", category=UserWarning)
+
+# --- CONFIGURATION ---
+MODEL_PATH = 'gesture_model.pkl'
+
+# --- SETUP MEDIAPIPE ---
+mp_hands = mp.solutions.hands
+mp_drawing = mp.solutions.drawing_utils
+hands = mp_hands.Hands(
+    static_image_mode=False,
+    max_num_hands=1,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5
+)
+
+def normalize_landmarks(landmarks):
+    wrist = landmarks.landmark[0]
+    wrist_x, wrist_y = wrist.x, wrist.y
+    coords = []
+    for lm in landmarks.landmark:
+        relative_x = lm.x - wrist_x
+        relative_y = lm.y - wrist_y
+        coords.extend([relative_x, relative_y])
+    return coords
+
+def draw_bar_chart(canvas, probabilities, labels, active_label):
+    """Draws a cool sci-fi style bar chart on the side canvas."""
+    h, w, _ = canvas.shape
+    bar_height = h // (len(labels) + 1)
+    
+    # Sort labels so they stay in the same place
+    sorted_indices = np.argsort(labels)
+    
+    for i, idx in enumerate(sorted_indices):
+        label = labels[idx]
+        score = probabilities[idx]
+        
+        # Determine color
+        # Gray = inactive, Green = Active/Winner
+        if label == active_label and score > 0.5:
+            color = (0, 255, 0) # Green
+            text_color = (255, 255, 255)
+        else:
+            color = (0, 100, 255) # Orange/Goldish
+            text_color = (150, 150, 150)
+
+        # Layout
+        y_pos = (i * bar_height) + 50
+        
+        # 1. Draw Label Text
+        cv2.putText(canvas, f"{label.upper()}", (10, y_pos), 
+                    cv2.FONT_HERSHEY_PLAIN, 1.2, text_color, 1)
+        
+        # 2. Draw Background Bar (Empty slot)
+        bar_x_start = 120
+        bar_width = w - 140
+        cv2.rectangle(canvas, (bar_x_start, y_pos - 15), 
+                      (bar_x_start + bar_width, y_pos + 5), (30, 30, 30), -1)
+        
+        # 3. Draw Active Bar (Score)
+        filled_width = int(bar_width * score)
+        cv2.rectangle(canvas, (bar_x_start, y_pos - 15), 
+                      (bar_x_start + filled_width, y_pos + 5), color, -1)
+        
+        # 4. Draw Percentage
+        cv2.putText(canvas, f"{int(score*100)}%", (bar_x_start + bar_width + 5, y_pos), 
+                    cv2.FONT_HERSHEY_PLAIN, 1, text_color, 1)
+
+def main():
+    print(f"Loading model from {MODEL_PATH}...")
+    try:
+        model = joblib.load(MODEL_PATH)
+        # Get the list of gesture names the model knows
+        classes = model.classes_
+    except Exception as e:
+        print(f"ERROR: {e}")
+        exit()
+
+    cap = cv2.VideoCapture(0)
+
+    print("Dashboard Active. Press 'q' to quit.")
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret: continue
+
+        # 1. PREPARE IMAGE
+        frame = cv2.flip(frame, 1)
+        h, w, _ = frame.shape
+        image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+        # 2. CREATE DASHBOARD CANVAS (Black panel on right)
+        # Width = 400px, Height = same as video
+        dashboard = np.zeros((h, 400, 3), dtype=np.uint8)
+
+        # 3. PROCESS HANDS
+        results = hands.process(image_rgb)
+        
+        # Default "No Hand" state
+        probs = np.zeros(len(classes))
+        prediction = "None"
+
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+                
+                features = normalize_landmarks(hand_landmarks)
+                
+                # Get Probabilities for ALL gestures
+                probs = model.predict_proba([features])[0]
+                prediction = model.predict([features])[0]
+
+        # 4. DRAW DASHBOARD
+        draw_bar_chart(dashboard, probs, classes, prediction)
+        
+        # 5. STITCH IMAGES TOGETHER
+        # Combine the webcam feed (frame) and dashboard side-by-side
+        final_display = np.hstack((frame, dashboard))
+
+        cv2.imshow('Neural Network Visualization', final_display)
+
+        if cv2.waitKey(5) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
