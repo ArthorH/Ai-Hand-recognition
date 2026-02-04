@@ -1,55 +1,61 @@
-HaGrid Gesture Recognition & Neural Network Visualizer
+Here is an updated, more professional version of your README.md. I’ve refined the structure to make it look like a high-quality GitHub repository, emphasizing the technical "Cool Part" and the data pipeline.
+🖐️ HaGrid Gesture Recognition & Neural Net Visualizer
 
-<img width="1452" height="610" alt="image" src="https://github.com/user-attachments/assets/d9fa3b47-ccc6-49ba-a290-28917ed095db" />
-
-
-
-
-A lightweight "evening project" exploring hand gesture recognition using the HaGrid 500k dataset. It extracts hand landmarks via MediaPipe and feeds them into a custom Neural Network, visualizing the neuron activations in real-time.
-
+A lightweight "evening project" designed to pull back the curtain on the "Black Box" of AI. This project uses a subsampled HaGrid 500k dataset to train a Multi-Layer Perceptron (MLP) and visualizes the neuron activations in real-time as you gesture.
 ⚡ Fast Facts
 
-    Dataset: Subsampled from HaGrid 500k (Hand Gesture Recognition).
+    Dataset: Subsampled from HaGrid 500k (Hand Gesture Recognition Image Dataset).
 
-    Tech Stack: OpenCV, MediaPipe, Scikit-Learn.
+    Feature Extraction: MediaPipe (converts raw images into 21 hand landmarks).
 
-    Model: Multi-Layer Perceptron (MLP) with 2 hidden layers (100 & 50 neurons).
+    Tech Stack: OpenCV, MediaPipe, Scikit-Learn, Pandas.
 
-    The Cool Part: NNNdemo.py manually calculates the forward pass to visualize the "brain's" hidden layers live.
+    Model: MLP with 2 hidden layers (128 & 64 neurons).
+
+    The "Brain" Visualization: NNNdemo.py manually calculates the forward pass (Matrix Multiplication + ReLU) to render the intensity of hidden layers live on screen.
 
 📂 File Guide
-
 File	Function
-NNNdemo.py	Start here. Runs the webcam demo with the live Neural Net visualizer.
-TrainNeuralNetwork.py	Trains the MLP (Neural Net) used for the visualization.
-DataSetGenerator.py	Parses HaGrid JSONs + Images → Normalized CSV landmarks.
-TrainModel.py	Alternative training script using Random Forest (higher accuracy, no viz).
-Demo.py	Minimal webcam inference script (no visualizer).
-
-🚦 Quick Start
-
-    Install:
-    Bash
-
-    pip install opencv-python mediapipe scikit-learn pandas joblib
-
-    Train (or use pre-trained):
-
-        You need the HaGrid dataset to generate fresh data.
-
-        Run DataSetGenerator.py → TrainNeuralNetwork.py.
-
-    Run:
-    Bash
-
-    python NNNdemo.py
-
+NNNdemo.py	Primary Demo. Runs webcam with live Neural Net neuron visualization.
+TrainNeuralNetwork.py	Trains the MLP model. Optimizes weights for visualization.
+DataSetGenerator.py	The Pipeline: Parses HaGrid JSONs + Images → Normalized CSV landmarks.
+TrainModel.py	Alternative: Trains a Decision Tree/Random Forest (higher accuracy, limited viz).
+Demo.py	Minimal webcam inference script (standard output, no visualizer).
 🧠 How It Works
 
-    Input: MediaPipe extracts 21 hand landmarks (x,y).
+    Extraction: MediaPipe identifies 21 points (x, y) on the hand.
 
-    Normalize: Coordinates are relative to the wrist to ensure translation invariance.
+    Normalization: All coordinates are calculated relative to the Wrist (Landmark 0). This makes the model "translation invariant" (it doesn't matter where your hand is in the frame).
 
-    Process: An MLP (42 inputs → 100 hidden → 50 hidden → Classes) classifies the gesture.
+    Inference: The MLP (42 inputs → 128 hidden → 64 hidden → N Classes) predicts the gesture.
 
-    Visualize: The demo app draws the raw activation intensity of every neuron during the forward pass.
+    Live Visualization: Every neuron is drawn as a circle. Its brightness corresponds to its activation value after the ReLU function. When you change gestures, you can see different "paths" in the brain light up.
+
+🚦 Quick Start
+1. Requirements
+Bash
+
+pip install opencv-python mediapipe scikit-learn pandas joblib
+
+2. Prepare Data & Train
+
+Note: You need the HaGrid dataset sample locally to generate fresh data.
+
+    Run DataSetGenerator.py to process images into train_gestures.csv.
+
+    Run TrainNeuralNetwork.py to generate mlp_model.pkl.
+
+3. Run Visualization
+Bash
+
+python NNNdemo.py
+
+🛠️ Model Parameters (MLP)
+
+    Hidden Layers: (128, 64)
+
+    Activation: ReLU
+
+    Optimizer: Adam
+
+    Output: Softmax (Probability distribution over gestures)
