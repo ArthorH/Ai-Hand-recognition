@@ -63,3 +63,9 @@ python NNNdemo.py
     Optimizer: Adam
 
     Output: Softmax (Probability distribution over gestures)
+
+<img width="1920" height="975" alt="Figure_1" src="https://github.com/user-attachments/assets/1f72d921-2986-4ff0-95c0-4ee2b0274c12" />
+
+<img width="1920" height="975" alt="Figure_2" src="https://github.com/user-attachments/assets/60e0c00b-89e1-4094-8733-8feccd0aa3e8" />
+
+
