@@ -1,6 +1,10 @@
 Here is an updated, more professional version of your README.md. I’ve refined the structure to make it look like a high-quality GitHub repository, emphasizing the technical "Cool Part" and the data pipeline.
 🖐️ HaGrid Gesture Recognition & Neural Net Visualizer
 
+<img width="1003" height="428" alt="image" src="https://github.com/user-attachments/assets/23ed9cf8-4214-4bce-97ca-dc3b50c93077" />
+<img width="1003" height="276" alt="image" src="https://github.com/user-attachments/assets/effdb722-f7ba-43cf-bd41-819e111e848f" />
+
+
 A lightweight "evening project" designed to pull back the curtain on the "Black Box" of AI. This project uses a subsampled HaGrid 500k dataset to train a Multi-Layer Perceptron (MLP) and visualizes the neuron activations in real-time as you gesture.
 ⚡ Fast Facts
 
